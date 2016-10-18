@@ -28,13 +28,15 @@ iptables -t nat -F
 ##Reglas para permitir SSH 1,2,3-
 ####WAN
 iptables -A INPUT -i $WAN_IF -d $WAN_IP_SAD -p tcp --dport 2222  -j ACCEPT
-iptables -A OUTPUT -o $WAN_IF -s $WAN_IP_SAD -p tcp --sport 2222  -j ACCEPT
+#iptables -A OUTPUT -o $WAN_IF -s $WAN_IP_SAD -p tcp --sport 2222  -j ACCEPT
 ####LAN
 iptables -A INPUT -i $LAN_IF -d $LAN_IP_SAD -p tcp --dport 2222  -j ACCEPT
-iptables -A OUTPUT -o $LAN_IF -s $LAN_IP_SAD -p tcp --sport 2222  -j ACCEPT
+#iptables -A OUTPUT -o $LAN_IF -s $LAN_IP_SAD -p tcp --sport 2222  -j ACCEPT
 ####DMZ
 iptables -A INPUT -i $DMZ_IF -d $DMZ_IP_SAD -p tcp --dport 2222  -j ACCEPT
-iptables -A OUTPUT -o $DMZ_IF -s $DMZ_IP_SAD -p tcp --sport 2222  -j ACCEPT
+#iptables -A OUTPUT -o $DMZ_IF -s $DMZ_IP_SAD -p tcp --sport 2222  -j ACCEPT
+
+ptables -A OUTPUT -p tcp --sport 2222 -m state --state ESTABLISHED,RELATED -J ACCEPT
 
 ##Reglas para permitir DHCP
 ####LAN
@@ -82,9 +84,9 @@ iptables -A FORWARD -o $LAN_IF -d $LAN_IP -p tcp --sport 443 -s $DMZ_IP -i $DMZ_
 
 #PING-12
 iptables -A FORWARD -p icmp -j ACCEPT
-iptables -A INPUT -p icmp -j ACCEPT
+#iptables -A INPUT -p icmp -j ACCEPT
 iptables -A OUTPUT -p icmp -j ACCEPT
-
+iptables -A INPUT -p icmp -m state --state ESTABLISHED,RELATED  -j ACCEPT
 
 #13- HTTTP-> WAN
 iptables -A FORWARD -i $LAN_IF -s $LAN_IP -p tcp --dport 80 -j ACCEPT
@@ -94,11 +96,12 @@ iptables -A FORWARD -i $LAN_IF -s $LAN_IP -p tcp --dport 443 -j ACCEPT
 
 #FIREWALL-DNS
 iptables -A OUTPUT -o $DMZ_IF -s $DMZ_IP_SAD -p udp --dport 53 -d $DMZ_IP_SAD -j ACCEPT
-iptables -A INPUT -i $DMZ_IF -d $DMZ_IP_SAD -p udp --sport 53 -s $DMZ_IP_SAD -j ACCEPT
+#iptables -A INPUT -i $DMZ_IF -d $DMZ_IP_SAD -p udp --sport 53 -s $DMZ_IP_SAD -j ACCEPT
 
 iptables -A OUTPUT -o $LAN_IF -s $WAN_IP_SAD -p udp --dport 53 -j ACCEPT
-iptables -A INPUT -i $LAN_IF -d $WAN_IP_SAD -p udp --sport 53 -j ACCEPT
+#iptables -A INPUT -i $LAN_IF -d $WAN_IP_SAD -p udp --sport 53 -j ACCEPT
 
+iptables -A INPUT -p -udp -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 ;;
 "stop")
